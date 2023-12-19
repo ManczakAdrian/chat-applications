@@ -5,14 +5,7 @@ const addMessageForm = document.querySelector('#add-messages-form');
 const userNameInput = document.querySelector('#username');
 const messageContentInput = document.querySelector('#message-content');
 
-const socket = io({
-    autoConnect: false
-  });
 
-  socket.on('message', (event) => addMessage(event.author, event.content))
-  //socket.on('message', ({ author, content }) => addMessage(author, content))
-  
-  socket.emit('message', { author: 'John Doe', content: 'Lorem Ipsum' });
 
 
 let userName='';
