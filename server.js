@@ -20,29 +20,41 @@ app.get('*', (req, res) => {
 });
 io.on('connection', (socket) => {
     console.log('New client! Its id – ' + socket.id);
-    socket.on('message', () => { console.log('Oh, I\'ve got something from ' + socket.id) });
-    console.log('I\'ve added a listener on message event \n');
-  });
   
   const socket = io({
     autoConnect: false
   });
 
-  socket.on('message', (message) => {
+  socket.on('join', (userName) => {
+    console.log(`Oh, new user ${userName} has joined the chat!`);
+    users[socket.id] = userName;
+
+    socket.emit('message', {
+        author: "ChatBot",
+        content: `<i>Welcome, ${userName}! Enjoy the chat!`,
+    });
+
+    socket.broadcast.emit('message', {
+        author: "ChatBot",
+        content: `<i>${userName} has joined the conversation!`,
+    });
+});
+
+socket.on('message', (message) => {
     console.log('Oh, I\'ve got something from ' + socket.id);
     messages.push(message);
     socket.broadcast.emit('message', message);
-  });
-  
-  
-  //socket.on('message', ({ author, content }) => addMessage(author, content))
-  
-  socket.emit('message', { author: 'John Doe', content: 'Lorem Ipsum' });
+});
 
-  (socket) => {
-    console.log('New client! Its id – ' + socket.id);
-    socket.on('message', () => { console.log('Oh, I\'ve got something from ' + socket.id) });
-    socket.on('disconnect', () => { console.log('Oh, socket ' + socket.id + ' has left') });
-    console.log('I\'ve added a listener on message and disconnect events \n');
-};
+socket.on('disconnect', () => {
+    const userName = users[socket.id];
+    if (userName) {
+        delete users[socket.id];
 
+        socket.broadcast.emit('message', {
+            author: "ChatBot",
+            content: `<i>${userName} has left the conversation... :(`,
+        });
+    }
+});
+});
